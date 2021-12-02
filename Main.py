@@ -5,6 +5,8 @@ from PyQt5.QtGui import QPainter, QColor, QPen
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QPushButton, QTextEdit, \
     QGridLayout, QLineEdit
 from Sorts_1 import Sorts1 as Sort1
+from Sorts_3 import Sorts3 as Sort3
+from Description import description
 
 
 class UI(QWidget):
@@ -13,9 +15,13 @@ class UI(QWidget):
         super().__init__()
         self.values = []
         self.colors = {}
+        self.uiSize = {
+            'width': 1200,
+            'height': 500,
+        }
         self.graphUIConfig = {
             'start': {'x': 10, 'y': 110},
-            'end': {'x': 790, 'y': 490},
+            'end': {'x': self.uiSize['width'] - 310, 'y': self.uiSize['height'] - 10},
             'interval': 50,  # 막대 너비의 %단위
             'color': [70, 180, 50],
             'background': [0, 0, 0],
@@ -33,15 +39,16 @@ class UI(QWidget):
         self.timer.timeout.connect(self.drawUI)
 
         self.sort1 = Sort1()
+        self.sort3 = Sort3()
 
         self.initUI()
         self.setEvents()
 
     def initUI(self):
 
-        self.setGeometry(300, 300, 800, 500)
-        self.setFixedSize(800,500)
-        self.setWindowTitle('ADProject - Team F(20151334,')
+        self.setGeometry(300, 300, self.uiSize['width'], self.uiSize['height'])
+        self.setFixedSize(self.uiSize['width'], self.uiSize['height'])
+        self.setWindowTitle('ADProject - Team F')
         self.mainBox = QVBoxLayout()
         self.mainBox.addStretch(0)
 
@@ -80,18 +87,27 @@ class UI(QWidget):
         buttonBox2.addWidget(self.UI['selectionButton'])
         buttonBox2.addWidget(self.UI['bogoButton'])
 
+        textBoxLayout = QHBoxLayout()
+        emptyBox = QWidget()
+
+        self.UI['text'] = QTextEdit()
+        self.UI['text'].setReadOnly(True)
+        textBoxLayout.addWidget(emptyBox, self.graphUIConfig['end']['x'] - self.graphUIConfig['start']['x'] + 20)
+        textBoxLayout.addWidget(self.UI['text'], 300)
+
         # 임시 비활성화
-        self.UI['quickButton'].setDisabled(True)
-        self.UI['heapButton'].setDisabled(True)
-        self.UI['insertionButton'].setDisabled(True)
         self.UI['mergeButton'].setDisabled(True)
 
         self.mainBox.addLayout(inputBox)
         self.mainBox.addLayout(buttonBox1)
         self.mainBox.addLayout(buttonBox2)
-        self.mainBox.addStretch(1)
+        self.mainBox.addLayout(textBoxLayout, 1)
         self.setLayout(self.mainBox)
         self.show()
+
+    def setText(self, text):
+        self.UI['text'].clear()
+        self.UI['text'].append(text)
 
     def setEvents(self):
         self.UI['bubbleButton'].clicked.connect(self.bubble)
@@ -100,36 +116,63 @@ class UI(QWidget):
         self.UI['cocktailButton'].clicked.connect(self.cocktail)
         self.UI['selectionButton'].clicked.connect(self.selection)
         self.UI['introButton'].clicked.connect(self.intro)
+        self.UI['insertionButton'].clicked.connect(self.insert)
+        self.UI['heapButton'].clicked.connect(self.heap)
+        self.UI['quickButton'].clicked.connect(self.quick)
 
     def bubble(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
-        self.drawList = self.sort1.bubbleSort(start, end)
+        self.setText(description['bubbleSort'])
+        self.drawList = self.sort3.bubbleSort(start, end)
 
     def counting(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
-        self.drawList = self.sort1.counting_sort_2(start, end)
+        self.setText(description['countingSort'])
+        self.drawList = self.sort1.counting_sort(start, end)
 
     def bogo(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['bogoSort'])
         self.drawList = self.sort1.bogo_sort(start, end)
 
     def cocktail(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['cocktailSort'])
         self.drawList = self.sort1.cocktail_sort(start, end)
 
     def selection(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['selectionSort'])
         self.drawList = self.sort1.selection_sort(start, end)
 
     def intro(self):
         start = int(self.UI['startEdit'].text().strip())
         end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['introSort'])
         self.drawList = self.sort1.intro_sort(start, end)
+
+    def insert(self):
+        start = int(self.UI['startEdit'].text().strip())
+        end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['insertSort'])
+        self.drawList = self.sort1.insertion_sort(start, end)
+
+    def heap(self):
+        start = int(self.UI['startEdit'].text().strip())
+        end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['heapSort'])
+        self.drawList = self.sort1.heap_sort(start, end)
+
+    def quick(self):
+        start = int(self.UI['startEdit'].text().strip())
+        end = int(self.UI['endEdit'].text().strip())
+        self.setText(description['quickSort'])
+        self.drawList = self.sort1.quick_sort(start, end)
 
     # update시 self.values로 막대를 그림
     def paintEvent(self, event):
@@ -192,10 +235,13 @@ class UI(QWidget):
     # drawList 순서대로 막대 갱신
     def drawUI(self):
         if len(self.drawList) < 1: return
-        self.values = list(self.drawList[0]['values'])
-        self.colors = self.drawList[0]['color']
-        self.drawList.pop(0)
-        self.update()
+        if 'error' in self.drawList[0]:
+            self.setText(self.drawList[0]['error'])
+        if 'values' in self.drawList[0] and 'color' in self.drawList[0]:
+            self.values = list(self.drawList[0]['values'])
+            self.colors = self.drawList[0]['color']
+            self.drawList.pop(0)
+            self.update()
 
 
 if __name__ == '__main__':
