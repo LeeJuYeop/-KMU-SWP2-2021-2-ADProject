@@ -66,13 +66,8 @@ class Sorts1():
             drawList += [{'values': list(values), 'color': {}}]
 
             if cnt > MAX:
-                drawList += [{'values': list(values), 'color': {}, 'error':"보고 정렬은 배열이 정렬될 때까지 배열을 무작위로 섞고 "
-                                                                           "확인하기를 반복하는 알고리즘입니다. 평균 시간복잡도는 O(nxn!)이고"
-                                                                           " 최악의 경우에는 O(∞)입니다. 확률에 의존하는 알고리즘으로 운이 좋다면"
-                                                                           " 가장 빠르게 정렬을 완료할 수 있지만 배열의 크기가 커질수록 정렬을 완료"
-                                                                           "할 확률이 극히 낮아지므로 매우 오랜 시간이 걸리는 비효율적인 알고리즘입니"
-                                                                           "다.\n\nerror : 정해진 시도횟수({}번) 이내로 정렬이 실패하여"
-                                                                           "알고리즘을 강제로 종료합니다.".format(MAX)}]
+                drawList += [{'values': list(values), 'color': {}, }]
+                drawList[-1]['error'] = "에러 : 제한된 시도횟수({}번) 이내로 정렬이 실패하여 알고리즘을 강제로 종료합니다.".format(MAX)
                 return drawList
 
         return drawList
@@ -196,18 +191,21 @@ class Sorts1():
         else:
             drawList = self.heap_drawList
 
+        # 부모트리와 자식트리 인덱스
         largest = i  # 트리에서 가장 큰 값 찾기
         l = 2 * i + 1  # Left Node
         r = 2 * i + 2  # Right Node
 
+        # 힙트리 성질(부모트리는 자식트리보다 값이 크다) 만족하는지 확인하고 아니면 트리(부모+자식2)에서 최댓값 변경
         if l < n and arr[i] < arr[l]:
             largest = l
 
         if r < n and arr[largest] < arr[r]:
             largest = r
 
-        # root가 최대가 아니면
+        # root가 최대가 아니면 ( 아래 노드가 위 노드보다 크면 )
         # 최대 값과 바꾸고, 계속 heapify
+        # 힙트리 성질 만족하면 끝.
         if largest != i:
             # 변경될 값 표시
             drawList += [{'values': list(arr), 'color': {i: [255, 255, 255], largest: [255, 255, 255]}}]
@@ -330,20 +328,21 @@ class Sorts1():
 
         n = len(values)
 
+        # 힙 트리 구성하기
         for i in range(n // 2, -1, -1):
             self.heapify(values, n, i, False)
-
-            self.heapify(values, n, i, False)
-
 
         for i in range(n - 1, 0, -1):
             # 변경될 값 표시
             self.heap_drawList += [{'values': list(values), 'color': {i: [255, 255, 255], 0: [255, 255, 255]}}]
             # 값 변경
+            # 리스트에서 가장 큰 값 맨 오른쪽으로 이동( 힙트리의 루트 노드의 값 )
+            # 동시에 가장 마지막 노드 ( 가장 아래, 가장 오른쪽 노드 ) 의 값이 힙의 루트로 이동.
             values[i], values[0] = values[0], values[i]
             # 변경 후 표시
             self.heap_drawList += [{'values': list(values), 'color': {}}]
 
+            # 노드 하나가 빠진 상태에서( 루트 노드에 가장 마지막 노드 값이 가고 원래 루트노드의 값 없어진 상태 ) 다시 힙 트리 구성.
             self.heapify(values, i, 0, False)
 
 
