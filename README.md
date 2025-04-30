@@ -13,5 +13,5 @@ Repo
 ---------------
 https://github.com/leejoowon20151334/KMU-SWP2-2021-2-ADProject
 
-##Description
+## Description
 10가지의 정렬을 알고리즘을 시각화.
